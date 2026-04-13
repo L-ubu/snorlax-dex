@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Header } from "@/components/header/header";
 import { FilterBar } from "@/components/filters/filter-bar";
 import { CardGrid } from "@/components/card-grid/card-grid";
+import { CardDetail } from "@/components/card-detail/card-detail";
 import { useFilters } from "@/hooks/use-filters";
 import { useZoom } from "@/hooks/use-zoom";
 import type { CardData } from "@/components/card-tile/card-tile";
@@ -12,11 +13,26 @@ interface CardWithOwnership extends CardData {
   owned: boolean;
 }
 
+interface SelectedCard {
+  id: number;
+  name: string;
+  set: string;
+  setYear: number;
+  cardNumber: string;
+  language: string;
+  variant: string;
+  rarity: string;
+  notes?: string | null;
+  imageUrl?: string | null;
+  caught: boolean;
+}
+
 export default function HomePage() {
   const filters = useFilters();
   const { zoom, zoomIn, zoomOut } = useZoom();
   const [cards, setCards] = useState<CardWithOwnership[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
 
   const fetchCards = useCallback(async () => {
     setLoading(true);
@@ -41,6 +57,34 @@ export default function HomePage() {
   useEffect(() => {
     fetchCards();
   }, [fetchCards]);
+
+  const handleCardClick = useCallback(
+    (card: CardData) => {
+      const withOwnership = cards.find((c) => c.id === card.id);
+      setSelectedCard({
+        ...card,
+        caught: withOwnership?.owned ?? false,
+      });
+    },
+    [cards]
+  );
+
+  const handleToggleCaught = useCallback(
+    async (cardId: number) => {
+      await fetch("/api/collection/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cardId }),
+      });
+      setCards((prev) =>
+        prev.map((c) => (c.id === cardId ? { ...c, owned: !c.owned } : c))
+      );
+      setSelectedCard((prev) =>
+        prev && prev.id === cardId ? { ...prev, caught: !prev.caught } : prev
+      );
+    },
+    []
+  );
 
   const caught = cards.filter((c) => c.owned).length;
 
@@ -79,7 +123,7 @@ export default function HomePage() {
                 zoom={zoom}
                 viewMode={filters.viewMode}
                 caughtFilter={filters.caughtFilter}
-                onCardClick={() => {}}
+                onCardClick={handleCardClick}
                 onZoomIn={zoomIn}
                 onZoomOut={zoomOut}
               />
@@ -87,6 +131,11 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+      <CardDetail
+        card={selectedCard}
+        onClose={() => setSelectedCard(null)}
+        onToggleCaught={handleToggleCaught}
+      />
     </>
   );
 }
