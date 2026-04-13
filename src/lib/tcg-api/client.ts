@@ -49,7 +49,11 @@ function normalizeCard(apiCard: TcgApiCard): NormalizedCard {
 }
 
 export async function fetchSnorlaxCards(): Promise<NormalizedCard[]> {
-  return (await fetchAllPages('/cards?q=name:"Snorlax"')).map(normalizeCard);
+  const query =
+    '(name:"Snorlax" OR name:"Snorlax V" OR name:"Snorlax VMAX" OR name:"Snorlax LV.X" OR name:"Sleep!")';
+  return (await fetchAllPages(`/cards?q=${encodeURIComponent(query)}`)).map(
+    normalizeCard
+  );
 }
 
 export async function fetchFullArtCards(
@@ -75,11 +79,15 @@ export function matchApiCardToSeedCard(
   seedCards: SeedCard[]
 ): SeedCard | null {
   return (
-    seedCards.find(
-      (s) =>
+    seedCards.find((s) => {
+      // TCG API returns just "11", seed data has "11/64" — compare number part
+      const seedNum = s.cardNumber.split("/")[0];
+      const apiNum = apiCard.cardNumber.split("/")[0];
+      return (
         s.set === apiCard.set &&
-        s.cardNumber === apiCard.cardNumber &&
+        seedNum === apiNum &&
         s.language === apiCard.language
-    ) ?? null
+      );
+    }) ?? null
   );
 }

@@ -50,13 +50,14 @@ export async function runSeed(options: RunSeedOptions = {}) {
       for (const apiCard of apiCards) {
         const match = matchApiCardToSeedCard(apiCard, seedsForMatch);
         if (match) {
-          const dbCard = insertedCards.find(
+          // Update ALL cards with the same set+number+language (different variants share an image)
+          const matchingDbCards = insertedCards.filter(
             (c) =>
               c.set === match.set &&
-              c.cardNumber === match.cardNumber &&
+              c.cardNumber.split("/")[0] === match.cardNumber.split("/")[0] &&
               c.language === match.language
           );
-          if (dbCard) {
+          for (const dbCard of matchingDbCards) {
             await db
               .update(cards)
               .set({ imageUrl: apiCard.imageUrl })
