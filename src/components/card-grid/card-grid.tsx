@@ -1,10 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
+import { motion } from "framer-motion";
 import { CardTile, type CardData } from "@/components/card-tile/card-tile";
 import { SetDivider } from "./set-divider";
 import { CategoryTile } from "./category-tile";
 import { ZoomControls } from "./zoom-controls";
+import {
+  staggerChildren,
+  staggerItem,
+  setDividerSlide,
+} from "@/lib/animations/variants";
 import type { CaughtFilter, ViewMode } from "@/hooks/use-filters";
 
 interface CardWithOwnership extends CardData {
@@ -94,7 +100,12 @@ export function CardGrid({
 
   return (
     <div className="relative">
-      <div className={gridClass}>
+      <motion.div
+        className={gridClass}
+        variants={staggerChildren}
+        initial="hidden"
+        animate="visible"
+      >
         {Array.from(setGroups.entries()).map(
           ([setName, { year, cards: setCards }]) => (
             <SetGroupSection
@@ -106,7 +117,7 @@ export function CardGrid({
             />
           )
         )}
-      </div>
+      </motion.div>
       {onZoomIn && onZoomOut && (
         <ZoomControls zoom={zoom} zoomIn={onZoomIn} zoomOut={onZoomOut} />
       )}
@@ -127,14 +138,17 @@ function SetGroupSection({
 }) {
   return (
     <>
-      <SetDivider setName={setName} year={year} />
+      <motion.div className="col-span-full" variants={setDividerSlide}>
+        <SetDivider setName={setName} year={year} />
+      </motion.div>
       {cards.map((card) => (
-        <CardTile
-          key={card.id}
-          card={card}
-          owned={card.owned}
-          onClick={onCardClick}
-        />
+        <motion.div key={card.id} variants={staggerItem}>
+          <CardTile
+            card={card}
+            owned={card.owned}
+            onClick={onCardClick}
+          />
+        </motion.div>
       ))}
     </>
   );

@@ -1,6 +1,26 @@
+"use client";
+
+import { useEffect } from "react";
+import {
+  motion,
+  useSpring,
+  useTransform,
+  useMotionValue,
+} from "framer-motion";
+
 interface HeaderProps {
   caught: number;
   total: number;
+}
+
+function AnimatedCounter({ value }: { value: number }) {
+  const mv = useMotionValue(0);
+  const spring = useSpring(mv, { stiffness: 200, damping: 20 });
+  const display = useTransform(spring, (v) => Math.round(v));
+  useEffect(() => {
+    mv.set(value);
+  }, [value, mv]);
+  return <motion.span>{display}</motion.span>;
 }
 
 export function Header({ caught, total }: HeaderProps) {
@@ -58,7 +78,7 @@ export function Header({ caught, total }: HeaderProps) {
         >
           <div className="flex flex-col items-center">
             <span className="font-mono text-[38px] font-bold leading-none text-pokeball-red">
-              {caught}
+              <AnimatedCounter value={caught} />
             </span>
             <span className="mt-1 font-mono text-[10px] tracking-[0.2em] text-snorlax-belly/[0.55]">
               CAUGHT
@@ -69,7 +89,7 @@ export function Header({ caught, total }: HeaderProps) {
           </span>
           <div className="flex flex-col items-center">
             <span className="font-mono text-[38px] font-bold leading-none text-snorlax-belly/[0.38]">
-              {total}
+              <AnimatedCounter value={total} />
             </span>
             <span className="mt-1 font-mono text-[10px] tracking-[0.2em] text-snorlax-belly/[0.38]">
               TOTAL

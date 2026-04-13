@@ -1,6 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import { motion } from "framer-motion";
+import {
+  floatingZzz,
+  pokeBallPulse,
+  shimmerGradient,
+  shimmerAnimation,
+} from "@/lib/animations/variants";
 
 export interface CardData {
   id: number;
@@ -21,6 +28,8 @@ interface CardTileProps {
   onClick: (card: CardData) => void;
 }
 
+const HOLO_RARITIES = ["Rare Holo", "Ultra Rare", "Secret Rare"];
+
 export function CardTile({ card, owned, onClick }: CardTileProps) {
   return (
     <button
@@ -36,6 +45,8 @@ export function CardTile({ card, owned, onClick }: CardTileProps) {
 }
 
 function CaughtTile({ card }: { card: CardData }) {
+  const isHolo = HOLO_RARITIES.includes(card.rarity);
+
   return (
     <div
       className="relative flex h-full w-full flex-col overflow-hidden rounded-lg"
@@ -45,7 +56,21 @@ function CaughtTile({ card }: { card: CardData }) {
         boxShadow: "0 0 12px rgba(126,200,227,0.4)",
       }}
     >
-      <div className="absolute right-2 top-2 z-10 h-1.5 w-1.5 rounded-full bg-pokeball-red" />
+      {/* Holo shimmer overlay */}
+      {isHolo && (
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-20 rounded-lg"
+          style={shimmerGradient}
+          animate={shimmerAnimation}
+        />
+      )}
+      {/* Pokeball pulse dot */}
+      <motion.div
+        className="absolute right-2 top-2 z-10 h-1.5 w-1.5 rounded-full bg-pokeball-red"
+        variants={pokeBallPulse}
+        initial="initial"
+        animate="pulse"
+      />
       <div className="relative flex flex-1 items-center justify-center overflow-hidden">
         {card.imageUrl ? (
           <Image
@@ -84,10 +109,24 @@ function WildTile({ card }: { card: CardData }) {
         opacity: 0.4,
       }}
     >
+      {/* Floating zzz */}
       <div className="absolute right-2 top-2 z-10">
-        <span className="font-mono text-xs" style={{ color: "#9a8b78" }}>
-          zzz
-        </span>
+        {[0, 0.4, 0.8].map((delay, i) => (
+          <motion.span
+            key={i}
+            className="absolute font-mono text-xs"
+            style={{
+              color: "#9a8b78",
+              right: `${i * 6}px`,
+              top: `${i * -4}px`,
+            }}
+            variants={floatingZzz(delay)}
+            initial="initial"
+            animate="animate"
+          >
+            z
+          </motion.span>
+        ))}
       </div>
       <div className="relative flex flex-1 items-center justify-center overflow-hidden">
         {card.imageUrl ? (
