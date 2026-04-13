@@ -60,6 +60,7 @@ export function FilterBar({
             <button
               key={value}
               type="button"
+              aria-pressed={caughtFilter === value}
               onClick={() => setCaughtFilter(value)}
               className={pillClass(caughtFilter === value)}
               style={pillStyle(caughtFilter === value)}
@@ -77,6 +78,7 @@ export function FilterBar({
             <button
               key={lang}
               type="button"
+              aria-pressed={language === lang}
               onClick={() => setLanguage(language === lang ? "" : lang)}
               className={pillClass(language === lang)}
               style={pillStyle(language === lang)}
@@ -94,6 +96,7 @@ export function FilterBar({
             <button
               key={mode}
               type="button"
+              aria-pressed={viewMode === mode}
               onClick={() => setViewMode(mode)}
               className={pillClass(viewMode === mode)}
               style={pillStyle(viewMode === mode)}
@@ -146,6 +149,7 @@ export function FilterBar({
           <input
             type="text"
             placeholder="Search cards..."
+            aria-label="Search cards by name, set, or number"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full rounded border bg-transparent py-1 pl-3 pr-3 font-mono text-xs placeholder:text-[#9a8b78]"

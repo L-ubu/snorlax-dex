@@ -101,6 +101,8 @@ export function CardGrid({
   return (
     <div className="relative">
       <motion.div
+        role="grid"
+        aria-label="Pokemon card collection"
         className={gridClass}
         variants={staggerChildren}
         initial="hidden"
