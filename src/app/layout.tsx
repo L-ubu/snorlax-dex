@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={jetbrainsMono.variable}>
-      <body className="bg-snorlax-body-dark text-snorlax-belly antialiased">
+      <body suppressHydrationWarning className="bg-snorlax-body-dark text-snorlax-belly antialiased">
         {children}
       </body>
     </html>

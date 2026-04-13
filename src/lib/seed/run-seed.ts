@@ -2,11 +2,48 @@ import { db } from "@/lib/db";
 import { cards, collection } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { snorlaxCards } from "./snorlax-cards";
-import {
-  fetchSnorlaxCards,
-  matchApiCardToSeedCard,
-} from "@/lib/tcg-api/client";
-import type { SeedCard } from "@/lib/tcg-api/client";
+
+const TCG_API_BASE = "https://api.pokemontcg.io/v2";
+
+interface TcgCard {
+  name: string;
+  number: string;
+  set: { name: string; releaseDate: string; total: number };
+  images: { large: string };
+  rarity?: string;
+}
+
+async function fetchTcgCards(query: string): Promise<TcgCard[]> {
+  const all: TcgCard[] = [];
+  let page = 1;
+  let hasMore = true;
+  while (hasMore) {
+    const res = await fetch(
+      `${TCG_API_BASE}/cards?q=${encodeURIComponent(query)}&page=${page}&pageSize=250`,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    if (!res.ok) throw new Error(`TCG API: ${res.status}`);
+    const data = await res.json();
+    all.push(...data.data);
+    hasMore = all.length < data.totalCount;
+    page++;
+  }
+  return all;
+}
+
+function buildImageMap(apiCards: TcgCard[]): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const c of apiCards) {
+    // Key by set name + card number (just the number part, no /total)
+    const key = `${c.set.name}|${c.number}`.toLowerCase();
+    map.set(key, c.images.large);
+  }
+  return map;
+}
+
+function extractNumber(cardNumber: string): string {
+  return cardNumber.split("/")[0];
+}
 
 interface RunSeedOptions {
   skipApiFetch?: boolean;
@@ -36,33 +73,27 @@ export async function runSeed(options: RunSeedOptions = {}) {
     )
     .returning();
 
-  // Fetch images from TCG API and match to seed entries
+  // Fetch images from TCG API
   if (!options.skipApiFetch) {
     try {
-      const apiCards = await fetchSnorlaxCards();
-      const seedsForMatch: SeedCard[] = insertedCards.map((c) => ({
-        name: c.name,
-        set: c.set,
-        cardNumber: c.cardNumber,
-        language: c.language,
-      }));
+      // Fetch all Snorlax-named cards plus known cameo cards
+      const [snorlaxApi, sleepApi, leftoversApi] = await Promise.all([
+        fetchTcgCards('name:"Snorlax"'),
+        fetchTcgCards('name:"Sleep!"'),
+        fetchTcgCards('name:"Leftovers"'),
+      ]);
+      const allApiCards = [...snorlaxApi, ...sleepApi, ...leftoversApi];
+      const imageMap = buildImageMap(allApiCards);
 
-      for (const apiCard of apiCards) {
-        const match = matchApiCardToSeedCard(apiCard, seedsForMatch);
-        if (match) {
-          // Update ALL cards with the same set+number+language (different variants share an image)
-          const matchingDbCards = insertedCards.filter(
-            (c) =>
-              c.set === match.set &&
-              c.cardNumber.split("/")[0] === match.cardNumber.split("/")[0] &&
-              c.language === match.language
-          );
-          for (const dbCard of matchingDbCards) {
-            await db
-              .update(cards)
-              .set({ imageUrl: apiCard.imageUrl })
-              .where(eq(cards.id, dbCard.id));
-          }
+      for (const dbCard of insertedCards) {
+        const num = extractNumber(dbCard.cardNumber);
+        const key = `${dbCard.set}|${num}`.toLowerCase();
+        const imageUrl = imageMap.get(key);
+        if (imageUrl) {
+          await db
+            .update(cards)
+            .set({ imageUrl })
+            .where(eq(cards.id, dbCard.id));
         }
       }
     } catch (e) {
