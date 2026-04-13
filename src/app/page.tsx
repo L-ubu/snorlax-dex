@@ -1,14 +1,90 @@
-import { Header } from "@/components/header/header";
+"use client";
 
-export default function Home() {
+import { useEffect, useState, useCallback } from "react";
+import { Header } from "@/components/header/header";
+import { FilterBar } from "@/components/filters/filter-bar";
+import { CardGrid } from "@/components/card-grid/card-grid";
+import { useFilters } from "@/hooks/use-filters";
+import { useZoom } from "@/hooks/use-zoom";
+import type { CardData } from "@/components/card-tile/card-tile";
+
+interface CardWithOwnership extends CardData {
+  owned: boolean;
+}
+
+export default function HomePage() {
+  const filters = useFilters();
+  const { zoom, zoomIn, zoomOut } = useZoom();
+  const [cards, setCards] = useState<CardWithOwnership[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCards = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams(filters.computeFilterParams());
+      const [cardsRes, colRes] = await Promise.all([
+        fetch(`/api/cards?${params}`),
+        fetch("/api/collection"),
+      ]);
+      const cardsData: CardData[] = await cardsRes.json();
+      const colData: { collectionId: number; owned: boolean; card: CardData }[] =
+        await colRes.json();
+      const ownedIds = new Set(
+        colData.filter((c) => c.owned).map((c) => c.card.id)
+      );
+      setCards(cardsData.map((c) => ({ ...c, owned: ownedIds.has(c.id) })));
+    } finally {
+      setLoading(false);
+    }
+  }, [filters.computeFilterParams]);
+
+  useEffect(() => {
+    fetchCards();
+  }, [fetchCards]);
+
+  const caught = cards.filter((c) => c.owned).length;
+
   return (
     <>
-      <Header caught={0} total={20} />
+      <Header caught={caught} total={cards.length} />
       <main className="belly-gradient min-h-screen pt-40">
-        <div className="flex flex-col items-center justify-center gap-4 px-4">
-          <p className="font-mono text-sm text-snorlax-body/60">
-            Your Pokemon card collection tracker
-          </p>
+        <div className="mx-auto max-w-6xl px-4 pb-24 pt-6">
+          <FilterBar
+            language={filters.language}
+            setLanguage={filters.setLanguage}
+            rarity={filters.rarity}
+            setRarity={filters.setRarity}
+            variant={filters.variant}
+            setVariant={filters.setVariant}
+            search={filters.search}
+            setSearch={filters.setSearch}
+            viewMode={filters.viewMode}
+            setViewMode={filters.setViewMode}
+            caughtFilter={filters.caughtFilter}
+            setCaughtFilter={filters.setCaughtFilter}
+          />
+          <div className="mt-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <span
+                  className="animate-pulse font-mono text-sm"
+                  style={{ color: "#9a8b78" }}
+                >
+                  zzz... loading cards...
+                </span>
+              </div>
+            ) : (
+              <CardGrid
+                cards={cards}
+                zoom={zoom}
+                viewMode={filters.viewMode}
+                caughtFilter={filters.caughtFilter}
+                onCardClick={() => {}}
+                onZoomIn={zoomIn}
+                onZoomOut={zoomOut}
+              />
+            )}
+          </div>
         </div>
       </main>
     </>
