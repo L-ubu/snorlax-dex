@@ -1,10 +1,9 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
 
-const client = createClient({
-  url: process.env.TURSO_DATABASE_URL ?? "file:data/snorlax-dex.db",
-  authToken: process.env.TURSO_AUTH_TOKEN,
-});
+const connectionString = process.env.DATABASE_URL!;
+
+const client = postgres(connectionString);
 
 export const db = drizzle(client, { schema });

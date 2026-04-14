@@ -1,7 +1,7 @@
-import { sqliteTable, text, integer, unique } from "drizzle-orm/sqlite-core";
+import { pgTable, serial, text, integer, boolean, unique } from "drizzle-orm/pg-core";
 
-export const cards = sqliteTable("cards", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+export const cards = pgTable("cards", {
+  id: serial("id").primaryKey(),
   name: text("name").notNull(),
   set: text("set").notNull(),
   setYear: integer("set_year").notNull(),
@@ -14,15 +14,15 @@ export const cards = sqliteTable("cards", {
   notes: text("notes"),
 });
 
-export const collection = sqliteTable(
+export const collection = pgTable(
   "collection",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: serial("id").primaryKey(),
     cardId: integer("card_id")
       .notNull()
       .references(() => cards.id),
     userId: text("user_id").notNull().default("default"),
-    owned: integer("owned", { mode: "boolean" }).notNull().default(false),
+    owned: boolean("owned").notNull().default(false),
   },
   (table) => [unique().on(table.cardId, table.userId)]
 );
