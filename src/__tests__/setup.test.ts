@@ -35,7 +35,7 @@ describe("Project scaffolding", () => {
     );
     expect(pkg.dependencies["framer-motion"]).toBeDefined();
     expect(pkg.dependencies["drizzle-orm"]).toBeDefined();
-    expect(pkg.dependencies["better-sqlite3"]).toBeDefined();
+    expect(pkg.dependencies["@libsql/client"]).toBeDefined();
     expect(pkg.devDependencies["vitest"]).toBeDefined();
   });
 });
