@@ -77,8 +77,10 @@ function CaughtTile({ card }: { card: CardData }) {
             src={card.imageUrl}
             alt={`${card.name} - ${card.cardNumber}`}
             fill
+            loading="lazy"
+            quality={75}
             className="object-contain p-1"
-            sizes="(max-width: 768px) 50vw, 33vw"
+            sizes="(max-width: 768px) 25vw, 20vw"
           />
         ) : (
           <CardPlaceholder card={card} caught />
@@ -134,8 +136,10 @@ function WildTile({ card }: { card: CardData }) {
             src={card.imageUrl}
             alt={`${card.name} - ${card.cardNumber}`}
             fill
+            loading="lazy"
+            quality={75}
             className="object-contain p-1 grayscale"
-            sizes="(max-width: 768px) 50vw, 33vw"
+            sizes="(max-width: 768px) 25vw, 20vw"
           />
         ) : (
           <CardPlaceholder card={card} caught={false} />

@@ -96,6 +96,31 @@ export function CardGrid({
   }
 
   const gridClass = GRID[zoom] || GRID[3];
+
+  if (viewMode === "byCard") {
+    return (
+      <div className="relative">
+        <motion.div
+          role="grid"
+          aria-label="Pokemon card collection"
+          className={gridClass}
+          variants={staggerChildren}
+          initial="hidden"
+          animate="visible"
+        >
+          {filtered.map((card) => (
+            <motion.div key={card.id} variants={staggerItem}>
+              <CardTile card={card} owned={card.owned} onClick={onCardClick} />
+            </motion.div>
+          ))}
+        </motion.div>
+        {onZoomIn && onZoomOut && (
+          <ZoomControls zoom={zoom} zoomIn={onZoomIn} zoomOut={onZoomOut} />
+        )}
+      </div>
+    );
+  }
+
   const setGroups = groupBySet(filtered);
 
   return (

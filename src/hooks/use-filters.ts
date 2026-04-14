@@ -19,9 +19,10 @@ export function useFilters() {
     if (category) p.category = category;
     if (language) p.language = language;
     if (rarity) p.rarity = rarity;
+    if (variant) p.variant = variant;
     if (search) p.search = search;
     return p;
-  }, [category, language, rarity, search]);
+  }, [category, language, rarity, variant, search]);
 
   return useMemo(
     () => ({

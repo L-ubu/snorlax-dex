@@ -9,11 +9,11 @@ export function useZoom(initial = 3) {
     []
   );
   const zoomIn = useCallback(
-    () => setZoomRaw((p) => Math.max(1, p - 1)),
+    () => setZoomRaw((p) => Math.min(4, p + 1)),
     []
   );
   const zoomOut = useCallback(
-    () => setZoomRaw((p) => Math.min(4, p + 1)),
+    () => setZoomRaw((p) => Math.max(1, p - 1)),
     []
   );
 

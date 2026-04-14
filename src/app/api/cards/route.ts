@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const language = searchParams.get("language");
   const set = searchParams.get("set");
   const rarity = searchParams.get("rarity");
+  const variant = searchParams.get("variant");
   const search = searchParams.get("search");
 
   const conditions: SQL[] = [];
@@ -16,6 +17,7 @@ export async function GET(request: NextRequest) {
   if (language) conditions.push(eq(cards.language, language));
   if (set) conditions.push(eq(cards.set, set));
   if (rarity) conditions.push(eq(cards.rarity, rarity));
+  if (variant) conditions.push(eq(cards.variant, variant));
   if (search) {
     const pattern = `%${search}%`;
     conditions.push(

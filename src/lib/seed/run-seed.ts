@@ -76,16 +76,22 @@ export async function runSeed(options: RunSeedOptions = {}) {
   // Fetch images from TCG API
   if (!options.skipApiFetch) {
     try {
-      // Fetch all Snorlax-named cards plus known cameo cards
-      const [snorlaxApi, sleepApi, leftoversApi] = await Promise.all([
+      // Fetch all Snorlax-named cards plus known cameo/related cards
+      const [snorlaxApi, sleepApi, leftoversApi, munchlaxApi, snorlaxDollApi, cameoApi] = await Promise.all([
         fetchTcgCards('name:"Snorlax"'),
         fetchTcgCards('name:"Sleep!"'),
         fetchTcgCards('name:"Leftovers"'),
+        fetchTcgCards('name:"Munchlax"'),
+        fetchTcgCards('name:"Snorlax Doll"'),
+        // Targeted queries for specific cameo cards
+        fetchTcgCards('(name:"Challenge!" OR name:"Computer Error" OR name:"Arcade Game" OR name:"Ghetsis" OR name:"Chespin" OR name:"Chansey" OR name:"Excadrill" OR name:"Milcery")'),
       ]);
-      const allApiCards = [...snorlaxApi, ...sleepApi, ...leftoversApi];
+      const allApiCards = [...snorlaxApi, ...sleepApi, ...leftoversApi, ...munchlaxApi, ...snorlaxDollApi, ...cameoApi];
       const imageMap = buildImageMap(allApiCards);
 
+      // Only assign images to English cards (TCG API only has EN images)
       for (const dbCard of insertedCards) {
+        if (dbCard.language !== "en") continue;
         const num = extractNumber(dbCard.cardNumber);
         const key = `${dbCard.set}|${num}`.toLowerCase();
         const imageUrl = imageMap.get(key);

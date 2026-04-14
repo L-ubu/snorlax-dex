@@ -14,7 +14,7 @@ export function ZoomControls({
       <button
         type="button"
         onClick={zoomIn}
-        disabled={zoom <= 1}
+        disabled={zoom >= 4}
         aria-label="Zoom in"
         className="flex h-10 w-10 items-center justify-center rounded-full font-mono text-lg font-bold text-white shadow-lg disabled:opacity-30"
         style={{ backgroundColor: "#2b4162", border: "2px solid #7ec8e3" }}
@@ -30,7 +30,7 @@ export function ZoomControls({
       <button
         type="button"
         onClick={zoomOut}
-        disabled={zoom >= 4}
+        disabled={zoom <= 1}
         aria-label="Zoom out"
         className="flex h-10 w-10 items-center justify-center rounded-full font-mono text-lg font-bold text-white shadow-lg disabled:opacity-30"
         style={{ backgroundColor: "#2b4162", border: "2px solid #7ec8e3" }}

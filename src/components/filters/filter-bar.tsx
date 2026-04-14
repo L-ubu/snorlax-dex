@@ -74,16 +74,16 @@ export function FilterBar({
           style={{ backgroundColor: "#c4b8a8" }}
         />
         <div className="flex gap-1">
-          {["EN", "JP"].map((lang) => (
+          {[{ label: "EN", value: "en" }, { label: "JP", value: "jp" }].map(({ label, value }) => (
             <button
-              key={lang}
+              key={value}
               type="button"
-              aria-pressed={language === lang}
-              onClick={() => setLanguage(language === lang ? "" : lang)}
-              className={pillClass(language === lang)}
-              style={pillStyle(language === lang)}
+              aria-pressed={language === value}
+              onClick={() => setLanguage(language === value ? "" : value)}
+              className={pillClass(language === value)}
+              style={pillStyle(language === value)}
             >
-              {lang}
+              {label}
             </button>
           ))}
         </div>
@@ -121,8 +121,13 @@ export function FilterBar({
             "Uncommon",
             "Rare",
             "Rare Holo",
-            "Ultra Rare",
-            "Secret Rare",
+            "Promo",
+            "Rare Ultra",
+            "Rare Rainbow",
+            "Rare Secret",
+            "Double Rare",
+            "Illustration Rare",
+            "Shiny Rare",
           ].map((r) => (
             <option key={r} value={r}>
               {r}
@@ -137,13 +142,27 @@ export function FilterBar({
           style={{ borderColor: "#c4b8a8" }}
         >
           <option value="">All Variants</option>
-          {["Normal", "Holo", "Reverse Holo", "Full Art", "Alt Art"].map(
-            (v) => (
-              <option key={v} value={v}>
-                {v}
-              </option>
-            )
-          )}
+          {[
+            "Holo",
+            "Reverse Holo",
+            "1st Edition",
+            "1st Edition Holo",
+            "Full Art",
+            "Rainbow Rare",
+            "Gold Secret",
+            "Illustration Rare",
+            "Shiny",
+            "Trainer Gallery",
+            "Cosmos Holo",
+            "Crosshatch Holo",
+            "Prerelease",
+            "Staff Prerelease",
+            "No Symbol Error",
+          ].map((v) => (
+            <option key={v} value={v}>
+              {v}
+            </option>
+          ))}
         </select>
         <div className="relative ml-auto flex-1" style={{ minWidth: "180px" }}>
           <input
