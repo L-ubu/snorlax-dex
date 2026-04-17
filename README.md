@@ -1,8 +1,8 @@
 # SnorlaxDex
 
-![Screenshot](assets/screenshot.png)
-
 A Pokemon TCG collection tracker with a Pokedex-inspired interface. Browse every Snorlax card ever printed, filter by language, rarity, and variant, and mark the ones you own.
+
+![Screenshot](assets/screenshot.png)
 
 ## Features
 
